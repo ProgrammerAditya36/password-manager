@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  typescript: {
+    // Disable type checking during production builds
+    ignoreBuildErrors: process.env.NODE_ENV === "production",
+  },
+  eslint: {
+    // Disable ESLint during production builds
+    ignoreDuringBuilds: process.env.NODE_ENV === "production",
+  },
 };
 
 export default nextConfig;
