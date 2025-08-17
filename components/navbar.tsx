@@ -4,13 +4,23 @@ import {
   SignedOut,
   SignInButton,
   SignUpButton,
+  useAuth,
   UserButton,
 } from "@clerk/nextjs";
 import ThemeToggleButton from "./theme/theme-toggle-button";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
+  const { userId } = useAuth();
+  const router = useRouter();
+  useEffect(() => {
+    if (userId) {
+      router.push("/dashboard");
+    }
+  }, [userId]);
   return (
     <header className="flex justify-between items-center gap-4 bg-card p-4 w-full h-16 min-h-16 max-h-16 overflow-hidden text-card-foreground">
       <div className="flex items-center space-x-2">
