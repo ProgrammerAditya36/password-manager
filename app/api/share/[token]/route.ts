@@ -6,10 +6,10 @@ import { transformPasswordDataArray } from "@/lib/helper";
 // GET shared content by token (public access)
 export async function GET(
   request: Request,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
-    const { token } = params;
+    const { token } = await params;
 
     const shareableLink = await prisma.shareableLink.findUnique({
       where: {
@@ -18,16 +18,6 @@ export async function GET(
       },
       include: {
         password: true,
-        passwordGroup: {
-          include: {
-            passwords: true,
-          },
-        },
-        user: {
-          select: {
-            email: true,
-          },
-        },
       },
     });
 
@@ -46,7 +36,6 @@ export async function GET(
       id: shareableLink.id,
       createdAt: shareableLink.createdAt,
       expiresAt: shareableLink.expiresAt,
-      sharedBy: shareableLink.user.email,
     };
 
     if (shareableLink.password) {
@@ -56,18 +45,6 @@ export async function GET(
       ]);
       responseData.password = transformedPassword;
       responseData.type = "password";
-    }
-
-    if (shareableLink.passwordGroup) {
-      // Transform passwords (decrypt)
-      const transformedPasswords = await transformPasswordDataArray(
-        shareableLink.passwordGroup.passwords
-      );
-      responseData.passwordGroup = {
-        ...shareableLink.passwordGroup,
-        passwords: transformedPasswords,
-      };
-      responseData.type = "group";
     }
 
     return NextResponse.json(responseData);
@@ -80,7 +57,7 @@ export async function GET(
 // POST import shared content
 export async function POST(
   request: Request,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   const { userId } = await auth();
 
@@ -89,7 +66,7 @@ export async function POST(
   }
 
   try {
-    const { token } = params;
+    const { token } = await params;
 
     const shareableLink = await prisma.shareableLink.findUnique({
       where: {
@@ -98,11 +75,6 @@ export async function POST(
       },
       include: {
         password: true,
-        passwordGroup: {
-          include: {
-            passwords: true,
-          },
-        },
       },
     });
 
@@ -170,13 +142,13 @@ export async function POST(
       };
     }
 
-    if (shareableLink.passwordGroup) {
-      // Check if user already imported this group
-      const existingImport = await prisma.userPasswordGroup.findUnique({
+    if (shareableLink.password) {
+      // Check if user already imported this password
+      const existingImport = await prisma.userPassword.findUnique({
         where: {
-          userId_passwordGroupId: {
+          userId_passwordId: {
             userId: user.id,
-            passwordGroupId: shareableLink.passwordGroup.id,
+            passwordId: shareableLink.password.id,
           },
         },
       });
@@ -187,24 +159,20 @@ export async function POST(
         });
       }
 
-      // Import the password group
-      const importedGroup = await prisma.userPasswordGroup.create({
+      // Import the password
+      const importedPassword = await prisma.userPassword.create({
         data: {
           userId: user.id,
-          passwordGroupId: shareableLink.passwordGroup.id,
+          passwordId: shareableLink.password.id,
         },
         include: {
-          passwordGroup: {
-            include: {
-              passwords: true,
-            },
-          },
+          password: true,
         },
       });
 
       result = {
-        type: "group",
-        imported: importedGroup,
+        type: "password",
+        imported: importedPassword,
       };
     }
 

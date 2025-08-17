@@ -16,5 +16,5 @@ export default async function HomePage() {
     redirect("/sign-in");
   }
 
-  return <DashboardContent user={user} />;
+  return <DashboardContent />;
 }

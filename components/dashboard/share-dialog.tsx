@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Password, PasswordGroup } from "@prisma/client";
+import { Password } from "@prisma/client";
 import {
   Dialog,
   DialogContent,
@@ -39,15 +39,13 @@ import {
 interface ShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  password?: Password | null;
-  group?: PasswordGroup | null;
+  password: Password;
 }
 
 export function ShareDialog({
   open,
   onOpenChange,
   password,
-  group,
 }: ShareDialogProps) {
   const [expiryOption, setExpiryOption] = useState<string>("never");
   const [customDate, setCustomDate] = useState<string>("");
@@ -101,8 +99,7 @@ export function ShareDialog({
       const expiresAt = getExpiryDate();
 
       const result = await createShareLinkMutation.mutateAsync({
-        passwordId: password?.id,
-        passwordGroupId: group?.id,
+        passwordId: password.id,
         expiresAt,
       });
 
@@ -125,8 +122,8 @@ export function ShareDialog({
     }
   };
 
-  const itemName = password?.name || group?.name || "";
-  const itemType = password ? "password" : "group";
+  const itemName = password?.name || "";
+  const itemType = "password";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -134,7 +131,7 @@ export function ShareDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share className="w-5 h-5" />
-            Share {itemType === "password" ? "Password" : "Group"}
+            Share Password
           </DialogTitle>
           <DialogDescription>
             Create a secure shareable link for "{itemName}"

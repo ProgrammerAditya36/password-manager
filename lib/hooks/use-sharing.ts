@@ -22,7 +22,7 @@ interface ShareableLinksResponse {
 }
 
 interface CreateShareLinkData {
-  passwordId?: string;
+  passwordId: string;
   expiresAt?: string;
 }
 
@@ -31,7 +31,7 @@ interface SharedContentResponse {
   createdAt: string;
   expiresAt?: string;
   sharedBy?: string;
-  password?: Password;
+  password: Password;
 }
 
 interface ImportedContentResponse {

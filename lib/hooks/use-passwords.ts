@@ -6,15 +6,8 @@ import {
 } from "@tanstack/react-query";
 import { Password } from "@prisma/client";
 
-interface PasswordWithGroup extends Password {
-  passwordGroup?: {
-    id: string;
-    name: string;
-  };
-}
-
 interface PasswordsResponse {
-  passwords: PasswordWithGroup[];
+  passwords: Password[];
   pagination: {
     page: number;
     limit: number;
@@ -32,7 +25,6 @@ interface CreatePasswordData {
   password: string;
   website?: string;
   description?: string;
-  passwordGroupId?: string | null;
 }
 
 interface UpdatePasswordData extends Partial<CreatePasswordData> {
@@ -43,15 +35,11 @@ interface UpdatePasswordData extends Partial<CreatePasswordData> {
 export const passwordKeys = {
   all: ["passwords"] as const,
   lists: () => [...passwordKeys.all, "list"] as const,
-  list: (filters: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    groupId?: string;
-  }) => [...passwordKeys.lists(), filters] as const,
+  list: (filters: { page?: number; limit?: number; search?: string }) =>
+    [...passwordKeys.lists(), filters] as const,
   details: () => [...passwordKeys.all, "detail"] as const,
   detail: (id: string) => [...passwordKeys.details(), id] as const,
-  infinite: (filters: { limit?: number; search?: string; groupId?: string }) =>
+  infinite: (filters: { limit?: number; search?: string }) =>
     [...passwordKeys.lists(), "infinite", filters] as const,
 };
 
@@ -59,8 +47,7 @@ export const passwordKeys = {
 const fetchPasswords = async (
   page: number = 1,
   limit: number = 20,
-  search?: string,
-  groupId?: string
+  search?: string
 ): Promise<PasswordsResponse> => {
   const params = new URLSearchParams({
     page: page.toString(),
@@ -68,7 +55,6 @@ const fetchPasswords = async (
   });
 
   if (search) params.append("search", search);
-  if (groupId) params.append("groupId", groupId);
 
   const response = await fetch(`/api/passwords?${params}`);
   if (!response.ok) {
@@ -124,7 +110,7 @@ const deletePassword = async (id: string): Promise<void> => {
 };
 
 // Fetch all passwords for export (no pagination)
-const fetchAllPasswords = async (): Promise<PasswordWithGroup[]> => {
+const fetchAllPasswords = async (): Promise<Password[]> => {
   // Use a reasonable limit for export - in production you might want to implement
   // server-side streaming for very large datasets
   const response = await fetch("/api/passwords?limit=1000");
@@ -139,27 +125,21 @@ const fetchAllPasswords = async (): Promise<PasswordWithGroup[]> => {
 export const usePasswords = (
   page: number = 1,
   limit: number = 20,
-  search?: string,
-  groupId?: string
+  search?: string
 ) => {
   return useQuery({
-    queryKey: passwordKeys.list({ page, limit, search, groupId }),
-    queryFn: () => fetchPasswords(page, limit, search, groupId),
+    queryKey: passwordKeys.list({ page, limit, search }),
+    queryFn: () => fetchPasswords(page, limit, search),
     staleTime: 1000 * 60 * 2, // 2 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes
   });
 };
 
 // Hook for infinite query of passwords
-export const useInfinitePasswords = (
-  limit: number = 20,
-  search?: string,
-  groupId?: string
-) => {
+export const useInfinitePasswords = (limit: number = 20, search?: string) => {
   return useInfiniteQuery({
-    queryKey: passwordKeys.infinite({ limit, search, groupId }),
-    queryFn: ({ pageParam = 1 }) =>
-      fetchPasswords(pageParam, limit, search, groupId),
+    queryKey: passwordKeys.infinite({ limit, search }),
+    queryFn: ({ pageParam = 1 }) => fetchPasswords(pageParam, limit, search),
     getNextPageParam: (lastPage) => {
       if (lastPage.pagination.hasNext) {
         const nextPage = lastPage.pagination.page + 1;

@@ -87,15 +87,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const {
-      name,
-      username,
-      email,
-      password,
-      website,
-      description,
-      passwordGroupId,
-    } = body;
+    const { name, username, email, password, website, description } = body;
 
     const encryptedPassword = await encrypt(password);
     // No encryption needed for the password field
@@ -108,7 +100,6 @@ export async function PUT(
         password: encryptedPassword,
         website,
         description,
-        passwordGroupId: passwordGroupId || null,
       },
     });
 

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 // POST deactivate a shareable link
 export async function POST(
   request: Request,
-  { params }: { params: { token: string } }
+  context: { params: Promise<{ token: string }> }
 ) {
   const { userId } = await auth();
 
@@ -14,7 +14,7 @@ export async function POST(
   }
 
   try {
-    const { token } = params;
+    const { token } = await context.params;
 
     // Verify the shareable link belongs to the user
     const shareableLink = await prisma.shareableLink.findFirst({
@@ -44,17 +44,6 @@ export async function POST(
             id: true,
             name: true,
             website: true,
-          },
-        },
-        passwordGroup: {
-          select: {
-            id: true,
-            name: true,
-            _count: {
-              select: {
-                passwords: true,
-              },
-            },
           },
         },
       },

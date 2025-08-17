@@ -294,10 +294,9 @@ export function DashboardContent() {
       />
 
       <ShareDialog
-        open={shareDialogOpen}
+        open={shareDialogOpen && !!sharingPassword}
         onOpenChange={setShareDialogOpen}
-        password={sharingPassword}
-        group={null}
+        password={sharingPassword!}
       />
     </div>
   );

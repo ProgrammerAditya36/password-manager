@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { passwordId, expiresAt } = body;
 
-    // Validate that either passwordId or passwordGroupId is provided, but not both
+    // Validate that passwordId is provided
     if (!passwordId) {
       return new NextResponse("passwordId must be provided", {
         status: 400,

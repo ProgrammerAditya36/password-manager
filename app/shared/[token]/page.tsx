@@ -29,7 +29,6 @@ import {
   Globe,
   Mail,
   FileText,
-  Folder,
   Shield,
   Calendar,
   Loader2,
@@ -176,7 +175,7 @@ export default function SharedContentPage() {
           )}
         </div>
 
-        {sharedContent.type === "password" && sharedContent.password && (
+        {sharedContent.password && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -290,14 +289,9 @@ export default function SharedContentPage() {
                     <span className="font-medium">Website</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <a
-                      href={sharedContent.password.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-primary hover:underline"
-                    >
+                    <span className="font-mono">
                       {sharedContent.password.website}
-                    </a>
+                    </span>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -324,135 +318,11 @@ export default function SharedContentPage() {
                     <FileText className="w-4 h-4 text-muted-foreground" />
                     <span className="font-medium">Description</span>
                   </div>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground">
                     {sharedContent.password.description}
                   </p>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        )}
-
-        {sharedContent.type === "group" && sharedContent.passwordGroup && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Folder className="w-5 h-5" />
-                {sharedContent.passwordGroup.name}
-              </CardTitle>
-              {sharedContent.passwordGroup.description && (
-                <p className="text-muted-foreground">
-                  {sharedContent.passwordGroup.description}
-                </p>
-              )}
-              <Badge variant="secondary">
-                {sharedContent.passwordGroup.passwords.length} passwords
-              </Badge>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="max-h-96">
-                <div className="space-y-4">
-                  {sharedContent.passwordGroup.passwords.map(
-                    (password, index) => (
-                      <div key={password.id}>
-                        <div className="p-4 border rounded-lg">
-                          <h4 className="mb-3 font-medium">{password.name}</h4>
-                          <div className="space-y-2">
-                            {password.username && (
-                              <div className="flex justify-between items-center text-sm">
-                                <span className="text-muted-foreground">
-                                  Username:
-                                </span>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-mono">
-                                    {password.username}
-                                  </span>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() =>
-                                      copyToClipboard(
-                                        password.username!,
-                                        `${password.id}-username`
-                                      )
-                                    }
-                                  >
-                                    {copied[`${password.id}-username`] ? (
-                                      <Check className="w-3 h-3" />
-                                    ) : (
-                                      <Copy className="w-3 h-3" />
-                                    )}
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-                            <div className="flex justify-between items-center text-sm">
-                              <span className="text-muted-foreground">
-                                Password:
-                              </span>
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono">
-                                  {showPassword[password.id]
-                                    ? password.password
-                                    : "••••••••"}
-                                </span>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    togglePasswordVisibility(password.id)
-                                  }
-                                >
-                                  {showPassword[password.id] ? (
-                                    <EyeOff className="w-3 h-3" />
-                                  ) : (
-                                    <Eye className="w-3 h-3" />
-                                  )}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    copyToClipboard(
-                                      password.password,
-                                      `${password.id}-password`
-                                    )
-                                  }
-                                >
-                                  {copied[`${password.id}-password`] ? (
-                                    <Check className="w-3 h-3" />
-                                  ) : (
-                                    <Copy className="w-3 h-3" />
-                                  )}
-                                </Button>
-                              </div>
-                            </div>
-                            {password.website && (
-                              <div className="flex justify-between items-center text-sm">
-                                <span className="text-muted-foreground">
-                                  Website:
-                                </span>
-                                <a
-                                  href={password.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="font-mono text-primary hover:underline"
-                                >
-                                  {password.website}
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        {index <
-                          sharedContent.passwordGroup!.passwords.length - 1 && (
-                          <Separator className="my-4" />
-                        )}
-                      </div>
-                    )
-                  )}
-                </div>
-              </ScrollArea>
             </CardContent>
           </Card>
         )}
@@ -463,7 +333,7 @@ export default function SharedContentPage() {
               <AlertDialogTitle>Import to Your Account</AlertDialogTitle>
               <AlertDialogDescription>
                 {isSignedIn
-                  ? `This will import the shared ${sharedContent.type} to your password manager. You'll be able to access it from your dashboard.`
+                  ? `This will import the shared password  to your password manager. You'll be able to access it from your dashboard.`
                   : "You need to sign in to import this content to your account."}
               </AlertDialogDescription>
             </AlertDialogHeader>

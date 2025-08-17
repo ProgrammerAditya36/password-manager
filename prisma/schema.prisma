@@ -45,9 +45,6 @@ model Password {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Group association
-  passwordGroupId String?
-
   // Users who imported this password
   importedBy UserPassword[]
 
