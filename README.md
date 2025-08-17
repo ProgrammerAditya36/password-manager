@@ -96,4 +96,62 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
+### Prerequisites
+
+1. **Database**: Ensure you have a PostgreSQL database accessible from Vercel (e.g., Vercel Postgres, Supabase, Neon, or Railway)
+2. **Environment Variables**: Set up all required environment variables in your Vercel project settings
+
+### Environment Variables for Vercel
+
+In your Vercel project settings, add these environment variables:
+
+```bash
+# Database
+DATABASE_URL="postgresql://username:password@host:port/database"
+
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+
+# AI Configuration
+GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key
+
+# Environment
+NODE_ENV=production
+```
+
+### Deployment Steps
+
+1. **Connect Repository**: Connect your GitHub repository to Vercel
+2. **Configure Build Settings**:
+   - Framework Preset: Next.js
+   - Build Command: `pnpm run build`
+   - Install Command: `pnpm install`
+   - Output Directory: `.next`
+3. **Set Environment Variables**: Add all required environment variables
+4. **Deploy**: Click deploy and wait for the build to complete
+
+### Common Issues and Solutions
+
+#### Prisma Client Generation Error
+
+If you encounter the error `Cannot find module '.prisma/client/default'`:
+
+1. **Check Build Logs**: Ensure the build command includes `prisma generate`
+2. **Environment Variables**: Verify `DATABASE_URL` is correctly set
+3. **Database Connection**: Ensure your database is accessible from Vercel's servers
+4. **Rebuild**: Sometimes a fresh deployment resolves the issue
+
+#### Database Connection Issues
+
+1. **Connection Pooling**: For production databases, consider using connection pooling (e.g., PgBouncer)
+2. **SSL Requirements**: Some databases require SSL connections in production
+3. **IP Whitelisting**: Ensure Vercel's IP ranges are allowed if your database has IP restrictions
+
+### Post-Deployment
+
+1. **Database Migration**: Run `prisma db push` or `prisma migrate deploy` if needed
+2. **Test Functionality**: Verify all features work correctly in production
+3. **Monitor Logs**: Check Vercel function logs for any runtime errors
+
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
