@@ -11,13 +11,20 @@ import { DashboardSearch } from "./dashboard-search";
 import { PasswordCards } from "./password-cards";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { RefreshCw, Download } from "lucide-react";
+import { RefreshCw, Download, MoreVertical } from "lucide-react";
 import {
   useDeletePassword,
   useRefreshPasswords,
   useAllPasswords,
 } from "@/lib/hooks/use-passwords";
 import { exportPasswordsToCSV } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 export function DashboardContent() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -29,6 +36,9 @@ export function DashboardContent() {
     new Set()
   );
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const deletePasswordMutation = useDeletePassword();
   const refreshPasswordsMutation = useRefreshPasswords();
@@ -74,6 +84,7 @@ export function DashboardContent() {
   const handleImportComplete = () => {
     // Refresh the passwords list after import
     refreshPasswordsMutation.mutate();
+    setShowImportDialog(false);
   };
 
   const handleExportToCSV = () => {
@@ -168,90 +179,101 @@ export function DashboardContent() {
   };
 
   return (
-    <div className="mx-auto p-6 min-h-screen container">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="font-bold text-3xl">Password Manager</h1>
-          <p className="text-muted-foreground">
-            Manage your passwords securely
-          </p>
-        </div>
-
+    <div className="mx-auto p-3 sm:p-6 min-h-screen container">
+      <div className="flex lg:flex-row flex-col lg:justify-between lg:items-center gap-4 mb-6 sm:mb-8">
         {/* Search Input */}
         <DashboardSearch />
 
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={handleRefreshPasswords}
-            disabled={refreshPasswordsMutation.isPending}
-            className="gap-2"
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${
-                refreshPasswordsMutation.isPending ? "animate-spin" : ""
-              }`}
-            />
-            {refreshPasswordsMutation.isPending ? "Refreshing..." : "Refresh"}
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={toggleSelectionMode}
-            className={`gap-2 ${
-              isSelectionMode ? "bg-primary text-primary-foreground" : ""
-            }`}
-          >
-            {isSelectionMode ? "Cancel Selection" : "Select Passwords"}
-          </Button>
-
-          {isSelectionMode && selectedPasswords.size > 0 && (
-            <Button
-              variant="outline"
-              onClick={handleBulkExport}
-              className="gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Export Selected ({selectedPasswords.size})
-            </Button>
-          )}
-
-          <Button
-            variant="outline"
-            onClick={handleExportToCSV}
-            disabled={isExporting || !allPasswords || allPasswords.length === 0}
-            className="gap-2"
-          >
-            <Download className="w-4 h-4" />
-            {isExporting ? "Preparing..." : "Export All CSV"}
-          </Button>
-
-          <div className="opacity-100 pointer-events-auto">
-            <ImportPasswordsDialog onImportComplete={handleImportComplete} />
-          </div>
-
-          <div className="opacity-100 pointer-events-auto">
-            <CreatePasswordDialog />
-          </div>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2 order-2 lg:order-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm"
+                aria-label="More options"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={handleRefreshPasswords}
+                disabled={refreshPasswordsMutation.isPending}
+                className="gap-2"
+              >
+                <RefreshCw
+                  className={`w-4 h-4 ${
+                    refreshPasswordsMutation.isPending ? "animate-spin" : ""
+                  }`}
+                />
+                <span>
+                  {refreshPasswordsMutation.isPending
+                    ? "Refreshing..."
+                    : "Refresh"}
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={toggleSelectionMode}
+                className={`gap-2 ${
+                  isSelectionMode ? "bg-primary/10 font-semibold" : ""
+                }`}
+              >
+                <span>
+                  {isSelectionMode ? "Cancel Selection" : "Select Passwords"}
+                </span>
+              </DropdownMenuItem>
+              {isSelectionMode && selectedPasswords.size > 0 && (
+                <DropdownMenuItem onClick={handleBulkExport} className="gap-2">
+                  <Download className="w-4 h-4" />
+                  <span>Export Selected ({selectedPasswords.size})</span>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem
+                onClick={handleExportToCSV}
+                disabled={
+                  isExporting || !allPasswords || allPasswords.length === 0
+                }
+                className="gap-2"
+              >
+                <Download className="w-4 h-4" />
+                <span>{isExporting ? "Preparing..." : "Export All CSV"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setShowImportDialog(true)}
+                className="gap-2"
+              >
+                <span>Import Passwords</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setShowCreateDialog(true)}
+                className="gap-2"
+              >
+                <span>Add New Password</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       {/* Selection mode indicator */}
       {isSelectionMode && (
         <div className="bg-muted mb-4 p-3 rounded-lg">
-          <div className="flex justify-between items-center">
-            <p className="text-muted-foreground text-sm">
+          <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-3">
+            <p className="text-muted-foreground text-xs sm:text-sm">
               Select passwords to export. Click on password cards to
               select/deselect them.
               {selectedPasswords.size > 0 &&
                 ` ${selectedPasswords.size} password(s) selected.`}
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-shrink-0 gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={selectAllPasswords}
                 disabled={!allPasswords || allPasswords.length === 0}
+                className="px-2 py-1 text-xs"
               >
                 Select All
               </Button>
@@ -260,6 +282,7 @@ export function DashboardContent() {
                 size="sm"
                 onClick={deselectAllPasswords}
                 disabled={selectedPasswords.size === 0}
+                className="px-2 py-1 text-xs"
               >
                 Deselect All
               </Button>

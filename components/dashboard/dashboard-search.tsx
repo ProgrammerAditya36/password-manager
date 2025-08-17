@@ -84,7 +84,7 @@ export function DashboardSearch({
   }, []);
 
   return (
-    <div className="flex-1 mx-8 max-w-md">
+    <div className="flex-1 w-full">
       <div className="relative">
         <input
           type="text"

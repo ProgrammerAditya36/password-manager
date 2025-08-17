@@ -105,6 +105,8 @@ export function ShareDialog({
 
       const fullLink = `${window.location.origin}/shared/${result.token}`;
       setShareableLink(fullLink);
+      // copy to clipboard
+      await navigator.clipboard.writeText(fullLink);
       toast.success("Shareable link created successfully!");
     } catch (error) {
       toast.error("Failed to create shareable link");

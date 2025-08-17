@@ -223,7 +223,7 @@ export function PasswordCard({
               <CardTitle className="text-lg">{password.name}</CardTitle>
               {password.website && (
                 <CardDescription className="flex items-center gap-1">
-                  <Link
+                  <a
                     href={password.website}
                     target="_blank"
                     className="flex items-center gap-1"
@@ -233,7 +233,7 @@ export function PasswordCard({
                       {password.website.slice(0, 30)}
                       {password.website.length > 30 && "..."}
                     </span>
-                  </Link>
+                  </a>
                 </CardDescription>
               )}
             </div>

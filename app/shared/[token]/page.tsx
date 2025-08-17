@@ -81,7 +81,7 @@ export default function SharedContentPage() {
       await importMutation.mutateAsync(token);
       toast.success("Content imported successfully!");
       setShowImportDialog(false);
-      router.push("/");
+      router.push("/dashboard");
     } catch (error: any) {
       if (error.message.includes("already imported")) {
         toast.error("You have already imported this content");
@@ -116,7 +116,7 @@ export default function SharedContentPage() {
             <p className="text-muted-foreground">
               {error.message || "This shared link is no longer available."}
             </p>
-            <Button onClick={() => router.push("/")} variant="outline">
+            <Button onClick={() => router.push("/dashboard")} variant="outline">
               Go to Dashboard
             </Button>
           </CardContent>
