@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String?   
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // User's own passwords 
+  passwords      Password[]
+
+  // Imported passwords 
+  importedPasswords     UserPassword[]
+
+  // Shareable links created by user
+  shareableLinks ShareableLink[]
+
+  @@map("users")
+  @@index([clerkId])
+}
+
+model Password {
+  id          String   @id @default(cuid())
+  name        String
+  username    String?
+  email       String?
+  password    String   // Will be encrypted
+  website     String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Original creator
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Group association
+  passwordGroupId String?
+
+  // Users who imported this password
+  importedBy UserPassword[]
+
+  // Shareable links
+  shareableLinks ShareableLink[]
+
+  @@map("passwords")
+  @@index([userId])
+  @@index([createdAt])
+  @@index([name])
+  @@index([website])
+  @@index([email])
+  @@index([username])
+}
+
+
+model ShareableLink {
+  id        String   @id @default(cuid())
+  token     String   @unique @default(cuid())
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+  isActive  Boolean  @default(true)
+
+  // Creator
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // What's being shared
+  passwordId      String?
+  password        Password?      @relation(fields: [passwordId], references: [id])
+
+  @@map("shareable_links")
+}
+
+model UserPassword {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  passwordId String
+  password   Password @relation(fields: [passwordId], references: [id], onDelete: Cascade)
+
+  importedAt DateTime @default(now())
+
+  @@unique([userId, passwordId])
+  @@map("user_passwords")
+}
+
